@@ -4,6 +4,6 @@ source "https://rubygems.org"
 gem 'nokogiri'
 gem 'typhoeus'
 gem 'plist'
-gem 'pinboard', github: 'ryw/pinboard'
+gem 'pinboard'
 gem 'awesome_print'
 gem 'pry'

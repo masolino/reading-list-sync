@@ -2,9 +2,9 @@ class PinboardBookmark
   include Bookmark
 
   API_KEY = CONFIG['services']['pinboard_api_key']
-  REJECT_TAGS = %w(facebook twitter objective-c)
-  MAX_POST_AGE = 90 # oldest age we consider a bookmark for "toread"
-  
+  REJECT_TAGS = %w(facebook twitter objective-c IFTTT Pocket)
+  MAX_POST_AGE = 0 # oldest age we consider a bookmark for "toread"
+
   attr_accessor :url, :title, :tags, :description, :date_added, :to_read
   attr_accessor :remote # Pinboard::Post (https://github.com/ryw/pinboard/)
 

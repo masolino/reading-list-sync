@@ -6,8 +6,8 @@ require 'awesome_print'
 require 'yaml'
 
 begin
-  CONFIG = YAML.load_file('config/secrets.yml') 
-#rescue 
+  CONFIG = YAML.load_file('config/secrets.yml')
+#rescue
 #  raise "Error reading config file config/secrets.yml. Please check the README for instructions"
 end
 
@@ -60,7 +60,8 @@ module ReadingList
           counts[:removed] += 1
         end
       else
-        # move reading list to pinboard 
+        # move reading list to pinboard
+        p.tags = p.smart_tags
         p.save!
         puts "  * adding with tags #{p.smart_tags}"
         counts[:added] += 1
