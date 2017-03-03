@@ -15,6 +15,7 @@ require 'nokogiri'
 require 'pinboard'
 require 'open3'
 require 'typhoeus'
+require 'json'
 
 require 'bookmark'
 require 'safari_bookmark'
@@ -32,7 +33,6 @@ module ReadingList
       puts " date:   #{p.date_added}"
       puts "  age:   #{p.post_age} days ago"
       puts " pinboard status/update:"
-
       if p.exists?
         if bookmark.still_online?
           puts "   => exists, current tags: #{p.tags}"
@@ -65,6 +65,8 @@ module ReadingList
         p.save!
         puts "  * adding with tags #{p.smart_tags}"
         counts[:added] += 1
+
+        self.add_to_evernote p.url, p.title, p.smart_tags
       end
     end
     puts "\nStats:\n"
@@ -72,4 +74,30 @@ module ReadingList
     puts
   end
 
+  def self.osascript(script)
+    system 'osascript', *script.split(/\n/).map { |line| ['-e', line] }.flatten
+  end
+
+  def self.add_to_evernote(url, title, tags)
+    self.osascript <<-END
+      tell application "Evernote"
+      	if (not (notebook named "Bookmarks" exists)) then
+      		make notebook with properties {name:"Bookmarks"}
+      	end if
+      	set note_url to "#{ url }"
+      	set new_note to create note title "#{ title }" from url "#{ url }" notebook "Bookmarks"
+      	set the source URL of new_note to note_url
+      	repeat with theTag in {#{ self.clean_tags tags }}
+      		if (not (tag named theTag exists)) then
+      			make tag with properties {name:theTag}
+      		end if
+      		assign tag theTag to new_note
+      	end repeat
+      end tell
+    END
+  end
+
+  def self.clean_tags(tags)
+    tags.to_json.tr('[', '').tr(']', '')
+  end
 end
