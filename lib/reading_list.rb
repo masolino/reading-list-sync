@@ -79,25 +79,63 @@ module ReadingList
   end
 
   def self.add_to_evernote(url, title, tags)
+
+    webarchive_filename = "#{self.parameterize title}.webarchive"
+
+    webarchive = "~/Desktop/#{webarchive_filename}"
+
+    self.save_webarchive_on_desktop(url, webarchive)
+
     self.osascript <<-END
       tell application "Evernote"
-      	if (not (notebook named "Bookmarks" exists)) then
-      		make notebook with properties {name:"Bookmarks"}
-      	end if
-      	set note_url to "#{ url }"
-      	set new_note to create note title "#{ title }" from url "#{ url }" notebook "Bookmarks"
-      	set the source URL of new_note to note_url
-      	repeat with theTag in {#{ self.clean_tags tags }}
-      		if (not (tag named theTag exists)) then
-      			make tag with properties {name:theTag}
-      		end if
-      		assign tag theTag to new_note
-      	end repeat
+        if (not (notebook named "Bookmarks" exists)) then
+          make notebook with properties {name:"Bookmarks"}
+        end if
+        set note_url to "#{url}"
+        set new_note to create note title "#{title}" from url "#{url}" notebook "Bookmarks"
+        set the source URL of new_note to note_url
+        repeat with theTag in {#{self.clean_tags tags}}
+          if (not (tag named theTag exists)) then
+            make tag with properties {name:theTag}
+          end if
+          assign tag theTag to new_note
+        end repeat
+
+        set textPathDesktopFolder to (path to desktop folder from user domain) as text
+        set file_webarchive to (textPathDesktopFolder & "#{webarchive_filename}")
+
+        append new_note attachment file file_webarchive
+
       end tell
     END
+
+    self.delete_webarchive_from_desktop(webarchive)
+  end
+
+  def self.save_webarchive_on_desktop(url, file)
+    system "webarchiver -url #{url} -output #{file}"
+  end
+
+  def self.delete_webarchive_from_desktop(file)
+    system "rm -rf #{file}"
   end
 
   def self.clean_tags(tags)
     tags.to_json.tr('[', '').tr(']', '')
+  end
+
+  def self.parameterize(string, sep = '-')
+    # replace accented chars with their ascii equivalents
+    parameterized_string = string
+    # Turn unwanted chars into the separator
+    parameterized_string.gsub!(/[^a-z0-9\-_]+/, sep)
+    unless sep.nil? || sep.empty?
+      re_sep = Regexp.escape(sep)
+      # No more than one of the separator in a row.
+      parameterized_string.gsub!(/#{re_sep}{2,}/, sep)
+      # Remove leading/trailing separator.
+      parameterized_string.gsub!(/^#{re_sep}|#{re_sep}$/, '')
+    end
+    parameterized_string.downcase
   end
 end
