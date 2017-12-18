@@ -1,9 +1,10 @@
 # A sample Gemfile
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-gem 'nokogiri'
-gem 'typhoeus'
-gem 'plist'
-gem 'pinboard'
 gem 'awesome_print'
+gem 'lunchy'
+gem 'nokogiri'
+gem 'pinboard'
+gem 'plist'
 gem 'pry'
+gem 'typhoeus'

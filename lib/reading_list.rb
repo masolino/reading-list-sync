@@ -79,12 +79,7 @@ module ReadingList
   end
 
   def self.add_to_evernote(url, title, tags)
-
-    webarchive_filename = "#{self.parameterize title}.webarchive"
-
-    webarchive = "~/Desktop/#{webarchive_filename}"
-
-    self.save_webarchive_on_desktop(url, webarchive)
+    self.save_webarchive_on_desktop(url)
 
     self.osascript <<-END
       tell application "Evernote"
@@ -102,22 +97,22 @@ module ReadingList
         end repeat
 
         set textPathDesktopFolder to (path to desktop folder from user domain) as text
-        set file_webarchive to (textPathDesktopFolder & "#{webarchive_filename}")
+        set file_webarchive to (textPathDesktopFolder & "archive.webarchive")
 
-        append new_note attachment file file_webarchive
+        tell new_note to append attachment file file_webarchive
 
       end tell
     END
 
-    self.delete_webarchive_from_desktop(webarchive)
+    self.delete_webarchive_from_desktop
   end
 
-  def self.save_webarchive_on_desktop(url, file)
-    system "webarchiver -url #{url} -output #{file}"
+  def self.save_webarchive_on_desktop(url)
+    system "/usr/local/bin/webarchiver -url #{url} -output ~/Desktop/archive.webarchive"
   end
 
-  def self.delete_webarchive_from_desktop(file)
-    system "rm -rf #{file}"
+  def self.delete_webarchive_from_desktop
+    system 'rm -rf ~/Desktop/archive.webarchive'
   end
 
   def self.clean_tags(tags)
